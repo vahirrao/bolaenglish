@@ -12,10 +12,12 @@ import com.bolaenglish.app.ui.onboarding.OnboardingViewModel
 class MainActivity : ComponentActivity() {
     private val onboarding: OnboardingViewModel by viewModels()
 
+    private val lessons: com.bolaenglish.app.ui.LessonViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BolaEnglishTheme { BolaNavigation(onboarding) }
+            BolaEnglishTheme { BolaNavigation(onboarding, lessons) }
         }
     }
 }

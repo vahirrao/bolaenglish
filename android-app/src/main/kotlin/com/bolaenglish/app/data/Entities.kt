@@ -69,5 +69,6 @@ data class DailyPracticeLog(
     @PrimaryKey val dateEpochDay: Long,
     val minutesPracticed: Int = 0,
     val xpEarned: Int = 0,
-    val lessonsCompleted: Int = 0
+    val lessonsCompleted: Int = 0,
+    @androidx.room.ColumnInfo(defaultValue = "0") val remainingMillis: Long = 0
 )

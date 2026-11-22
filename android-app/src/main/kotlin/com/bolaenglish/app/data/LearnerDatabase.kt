@@ -24,6 +24,9 @@ abstract class ProfileDao {
 
 @Dao
 interface LessonDao {
+    @Query("SELECT * FROM LessonProgress WHERE lessonId = :id")
+    suspend fun find(id: String): LessonProgress?
+
     @Upsert suspend fun save(progress: LessonProgress)
     @Query("SELECT * FROM LessonProgress ORDER BY lastPracticedAt DESC, lessonId")
     fun observe(): Flow<List<LessonProgress>>
@@ -31,6 +34,9 @@ interface LessonDao {
 
 @Dao
 abstract class ReviewDao {
+    @Query("SELECT * FROM SpacedRepetitionItem WHERE nextReviewAt <= :now ORDER BY nextReviewAt, id")
+    abstract fun observeDue(now: Long): Flow<List<SpacedRepetitionItem>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun add(item: SpacedRepetitionItem)
 
@@ -51,6 +57,9 @@ abstract class ReviewDao {
 
 @Dao
 interface PracticeDao {
+    @Query("SELECT * FROM DailyPracticeLog WHERE dateEpochDay = :day")
+    suspend fun find(day: Long): DailyPracticeLog?
+
     @Upsert suspend fun save(log: DailyPracticeLog)
     @Query("SELECT * FROM DailyPracticeLog ORDER BY dateEpochDay DESC")
     fun observe(): Flow<List<DailyPracticeLog>>
@@ -58,7 +67,8 @@ interface PracticeDao {
 
 @Database(
     entities = [LearnerProfile::class, LessonProgress::class, SpacedRepetitionItem::class, DailyPracticeLog::class],
-    version = 1
+    version = 2,
+    autoMigrations = [AutoMigration(from = 1, to = 2)]
 )
 abstract class LearnerDatabase : RoomDatabase() {
     abstract fun profiles(): ProfileDao
