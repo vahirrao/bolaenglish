@@ -13,12 +13,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bolaenglish.app.tutor.*
 import com.bolaenglish.app.R
 import com.bolaenglish.app.ui.*
 import com.bolaenglish.app.ui.onboarding.*
 
 @Composable
-fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel) {
+fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel, tutor: VoiceTutorViewModel) {
     val launchState by viewModel.launchState.collectAsStateWithLifecycle()
     Scaffold { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
@@ -45,7 +46,7 @@ fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel) {
                     val controller = rememberNavController()
                     NavHost(controller, startDestination = "lessonScreen") {
                         composable("lessonScreen") {
-                            LessonHub(data, lessons.modules, { controller.navigate("lesson/$it") }, { controller.navigate("review") })
+                            LessonHub(data, lessons.modules, { controller.navigate("lesson/$it") }, { controller.navigate("review") }, { controller.navigate("tutor") })
                         }
                         composable("lesson/{id}") { entry ->
                             val module = lessons.modules.first { it.id == entry.arguments?.getString("id") }
@@ -55,7 +56,10 @@ fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel) {
                             ReviewScreen(data.due, lessons, data.profile.nativeLanguage) { controller.popBackStack() }
                         }
                         composable("progressScreen") { Text(stringResource(R.string.progress_screen)) }
-                        composable("settingsScreen") { Text(stringResource(R.string.settings_screen)) }
+                        composable("tutor") {
+                            VoiceTutorScreen(tutor, data.profile, { controller.navigate("settingsScreen") }, { controller.popBackStack() })
+                        }
+                        composable("settingsScreen") { TutorSettings(tutor) { controller.popBackStack() } }
                     }
                 }
             }

@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.bolaenglish.app.data.Module
 
 @Composable
-fun LessonHub(state: LessonState, modules: List<Module>, open: (String) -> Unit, review: () -> Unit) {
+fun LessonHub(state: LessonState, modules: List<Module>, open: (String) -> Unit, review: () -> Unit, tutor: () -> Unit) {
     val learner = state.profile ?: return
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
@@ -26,6 +26,7 @@ fun LessonHub(state: LessonState, modules: List<Module>, open: (String) -> Unit,
                 Text("Review due cards (${state.due.size})")
             }
         }
+        item { Button(onClick = tutor) { Text("Practice with the voice tutor") } }
         items(modules, key = { it.id }) { module ->
             val progress = state.progress[module.id]
             val steps = (progress?.completedStepsMask ?: 0).countOneBits()

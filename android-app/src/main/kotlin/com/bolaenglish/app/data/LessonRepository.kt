@@ -43,15 +43,16 @@ class LessonRepository(private val db: LearnerDatabase) {
         }
     }
 
+    suspend fun completeTutorTurn(elapsed: Long) = db.withTransaction {
+        reward(System.currentTimeMillis(), elapsed, xp = TUTOR_TURN_XP, completed = false)
+    }
+
     private suspend fun reward(now: Long, elapsed: Long, xp: Int, completed: Boolean) {
         val day = localEpochDay(now)
         val profile = checkNotNull(db.profiles().current())
         val existing = db.practice().find(day)
         val log = existing ?: DailyPracticeLog(day)
-        val millis = log.remainingMillis + elapsed.coerceAtLeast(0)
-        db.practice().save(log.copy(minutesPracticed = log.minutesPracticed + (millis / 60000).toInt(),
-            remainingMillis = millis % 60000, xpEarned = log.xpEarned + xp,
-            lessonsCompleted = log.lessonsCompleted + if (completed) 1 else 0))
+        db.practice().save(log.recordActivity(elapsed, xp, completed))
         val streak = when {
             existing != null -> profile.currentStreak.coerceAtLeast(1)
             db.practice().find(day - 1) != null -> profile.currentStreak + 1
@@ -74,4 +75,13 @@ internal fun LessonProgress.advance(step: Int, firstTry: Boolean, now: Long): Le
     }
     return copy(completedStepsMask = priorMask or (1 shl (step - 1)), isCompleted = step == 5,
         accuracyPercent = accuracy, lastPracticedAt = now)
+}
+
+internal const val TUTOR_TURN_XP = 8
+
+internal fun DailyPracticeLog.recordActivity(elapsed: Long, xp: Int, completed: Boolean): DailyPracticeLog {
+    val millis = remainingMillis + elapsed.coerceAtLeast(0)
+    return copy(minutesPracticed = minutesPracticed + (millis / 60000).toInt(),
+        remainingMillis = millis % 60000, xpEarned = xpEarned + xp,
+        lessonsCompleted = lessonsCompleted + if (completed) 1 else 0)
 }

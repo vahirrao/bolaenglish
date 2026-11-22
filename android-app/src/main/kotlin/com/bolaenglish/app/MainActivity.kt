@@ -14,10 +14,12 @@ class MainActivity : ComponentActivity() {
 
     private val lessons: com.bolaenglish.app.ui.LessonViewModel by viewModels()
 
+    private val tutor: com.bolaenglish.app.tutor.VoiceTutorViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BolaEnglishTheme { BolaNavigation(onboarding, lessons) }
+            BolaEnglishTheme { BolaNavigation(onboarding, lessons, tutor) }
         }
     }
 }
