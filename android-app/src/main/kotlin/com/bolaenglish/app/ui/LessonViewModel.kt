@@ -12,7 +12,8 @@ import kotlinx.coroutines.launch
 
 data class LessonState(
     val profile: LearnerProfile?, val progress: Map<String, LessonProgress>,
-    val today: DailyPracticeLog?, val streak: Int, val due: List<SpacedRepetitionItem>
+    val today: DailyPracticeLog?, val streak: Int, val due: List<SpacedRepetitionItem>,
+    val recentHistory: List<DailyPracticeLog>
 )
 
 class LessonViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,7 +34,7 @@ class LessonViewModel(application: Application) : AndroidViewModel(application) 
     val state = combine(repository.profile, repository.progress, repository.history, reviews) {
         profile, progress, logs, (day, due) ->
         val streak = if (logs.any { it.dateEpochDay in day - 1..day }) profile?.currentStreak ?: 0 else 0
-        LessonState(profile, progress.associateBy { it.lessonId }, logs.find { it.dateEpochDay == day }, streak, due)
+        LessonState(profile, progress.associateBy { it.lessonId }, logs.find { it.dateEpochDay == day }, streak, due, logs.take(7))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     private val failure = MutableStateFlow<String?>(null)

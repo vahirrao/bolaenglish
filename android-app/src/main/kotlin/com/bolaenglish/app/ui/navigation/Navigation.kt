@@ -8,13 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel as routeViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bolaenglish.app.tutor.*
-import com.bolaenglish.app.R
+
 import com.bolaenglish.app.ui.*
 import com.bolaenglish.app.ui.onboarding.*
 
@@ -46,7 +46,8 @@ fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel, tut
                     val controller = rememberNavController()
                     NavHost(controller, startDestination = "lessonScreen") {
                         composable("lessonScreen") {
-                            LessonHub(data, lessons.modules, { controller.navigate("lesson/$it") }, { controller.navigate("review") }, { controller.navigate("tutor") })
+                            LessonHub(data, lessons.modules, { controller.navigate("lesson/$it") }, { controller.navigate("review") }, { controller.navigate("tutor") },
+                                { controller.navigate("progressScreen") }, { controller.navigate("settingsScreen") })
                         }
                         composable("lesson/{id}") { entry ->
                             val module = lessons.modules.first { it.id == entry.arguments?.getString("id") }
@@ -55,11 +56,17 @@ fun BolaNavigation(viewModel: OnboardingViewModel, lessons: LessonViewModel, tut
                         composable("review") {
                             ReviewScreen(data.due, lessons, data.profile.nativeLanguage) { controller.popBackStack() }
                         }
-                        composable("progressScreen") { Text(stringResource(R.string.progress_screen)) }
-                        composable("tutor") {
-                            VoiceTutorScreen(tutor, data.profile, { controller.navigate("settingsScreen") }, { controller.popBackStack() })
+                        composable("progressScreen") {
+                            val dashboard = routeViewModel<ProgressViewModel> { ProgressViewModel(lessons.state) }
+                            ProgressScreen(dashboard, { controller.navigate("review") }, { controller.popBackStack() })
                         }
-                        composable("settingsScreen") { TutorSettings(tutor) { controller.popBackStack() } }
+                        composable("tutor") {
+                            VoiceTutorScreen(tutor, data.profile, { controller.navigate("tutorSettings") }, { controller.popBackStack() })
+                        }
+                        composable("settingsScreen") {
+                            SettingsScreen(data.profile, routeViewModel(), { controller.navigate("tutorSettings") }, { controller.popBackStack() })
+                        }
+                        composable("tutorSettings") { TutorSettings(tutor) { controller.popBackStack() } }
                     }
                 }
             }

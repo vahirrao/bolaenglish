@@ -12,6 +12,12 @@ abstract class ProfileDao {
     @Query("SELECT * FROM LearnerProfile WHERE id = 1")
     abstract suspend fun current(): LearnerProfile?
 
+    @Query("UPDATE LearnerProfile SET nativeLanguage = :language, proficiencyLevel = :level, dailyGoalMinutes = :goal WHERE id = 1")
+    abstract suspend fun updatePreferences(language: NativeLanguage, level: ProficiencyLevel, goal: Int)
+
+    @Query("UPDATE LearnerProfile SET onboardingCompleted = 0 WHERE id = 1")
+    abstract suspend fun replayOnboarding()
+
     @Upsert
     abstract suspend fun save(profile: LearnerProfile)
 

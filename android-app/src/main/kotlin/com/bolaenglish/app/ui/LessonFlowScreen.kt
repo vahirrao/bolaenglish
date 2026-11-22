@@ -144,7 +144,7 @@ private fun ReviewCard(item: SpacedRepetitionItem, model: LessonViewModel, langu
 fun ReviewScreen(due: List<SpacedRepetitionItem>, model: LessonViewModel, language: NativeLanguage, back: () -> Unit) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        TextButton(onClick = back) { Text("Lesson hub") }
+        TextButton(onClick = back) { Text("Back") }
         Text("Review · ${due.size} due", style = MaterialTheme.typography.headlineMedium)
         if (due.isEmpty()) Text("All caught up.") else ReviewCard(due.first(), model, language)
     }
